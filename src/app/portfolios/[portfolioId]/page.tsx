@@ -254,7 +254,7 @@ export default function AssetsPage({
                     value={asset.value || ''}
                     onChange={(e) => updateAssetValue(asset.id, parseFloat(e.target.value) || 0)}
                     className="input-line w-32 py-2 text-white placeholder-gray-400 text-right"
-                    placeholder="Valor ($)"
+                    placeholder="Valor actual ($)"
                   />
                   <p className="text-xs text-gray-500 mt-1 text-right">USD</p>
                 </div>
@@ -319,4 +319,4 @@ export default function AssetsPage({
       </div>
     </div>
   );
-} 
+}
