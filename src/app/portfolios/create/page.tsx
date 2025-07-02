@@ -47,7 +47,7 @@ export default function CreatePortfolioPage() {
     setCreated(true);
 
     setTimeout(() => {
-      router.push(`/portfolios/${encodeURIComponent(name)}`);
+      router.push(`/portfolios/${encodeURIComponent(name)}/questions`);
     }, 1500);
   };
 

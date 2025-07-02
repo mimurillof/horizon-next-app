@@ -15,6 +15,7 @@ interface Asset {
   id: number;
   assetData?: AssetData;
   value: number; // USD
+  acquisitionDate?: string; // Nueva propiedad para la fecha
 }
 
 // Simulated assets data
@@ -178,7 +179,7 @@ export default function AssetsPage({
   const addAsset = () => {
     setAssets((prev) => [
       ...prev,
-      { id: Date.now(), value: 0 },
+      { id: Date.now(), value: 0, acquisitionDate: '' },
     ]);
   };
 
@@ -191,6 +192,12 @@ export default function AssetsPage({
   const updateAssetValue = (id: number, value: number) => {
     setAssets((prev) =>
       prev.map((a) => (a.id === id ? { ...a, value } : a))
+    );
+  };
+
+  const updateAssetAcquisitionDate = (id: number, date: string) => {
+    setAssets((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, acquisitionDate: date } : a))
     );
   };
 
@@ -238,35 +245,47 @@ export default function AssetsPage({
           assets.map((asset) => (
             <div
               key={asset.id}
-              className="flex items-center gap-4 p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+              className="flex items-end gap-2 p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
             >
-              <AssetDropdown
-                asset={asset}
-                onAssetSelect={(assetData) => updateAssetData(asset.id, assetData)}
-              />
-              
-              <div className="flex items-center gap-3">
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-end gap-1 sm:gap-2 flex-1">
+                <div className="flex flex-col flex-1 min-w-0">
+                  <label className="block text-xs text-gray-400 mb-1">Activo</label>
+                  <AssetDropdown
+                    asset={asset}
+                    onAssetSelect={(assetData) => updateAssetData(asset.id, assetData)}
+                  />
+                </div>
+                <div className="flex-shrink-0">
+                  <label htmlFor={`acquisition-date-${asset.id}`} className="block text-xs text-gray-400 mb-1">Fecha de adquisición</label>
+                  <input
+                    id={`acquisition-date-${asset.id}`}
+                    type="date"
+                    value={asset.acquisitionDate || ''}
+                    onChange={(e) => updateAssetAcquisitionDate(asset.id, e.target.value)}
+                    className="input-line w-36 py-2 text-white placeholder-gray-400"
+                    max={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
                   <input
                     type="number"
                     min={0}
                     step={0.01}
                     value={asset.value || ''}
                     onChange={(e) => updateAssetValue(asset.id, parseFloat(e.target.value) || 0)}
-                    className="input-line w-32 py-2 text-white placeholder-gray-400 text-right"
-                    placeholder="Valor actual ($)"
+                    className="input-line w-28 py-2 text-white placeholder-gray-400 text-right"
+                    placeholder="Valor actual"
                   />
-                  <p className="text-xs text-gray-500 mt-1 text-right">USD</p>
+                  <span className="text-xs text-gray-500">USD</span>
                 </div>
-                
-                <button
-                  onClick={() => removeAsset(asset.id)}
-                  className="text-gray-400 hover:text-red-500 transition-colors p-2"
-                  title="Eliminar activo"
-                >
-                  <span className="material-symbols-outlined">delete</span>
-                </button>
               </div>
+              <button
+                onClick={() => removeAsset(asset.id)}
+                className="text-gray-400 hover:text-red-500 transition-colors p-2"
+                title="Eliminar activo"
+              >
+                <span className="material-symbols-outlined">delete</span>
+              </button>
             </div>
           ))
         )}
