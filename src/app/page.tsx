@@ -16,6 +16,7 @@ export default function LoginPage() {
     // Aquí iría la lógica real de autenticación.
     console.log('Iniciando sesión con:', { username, password, rememberMe });
     // Simular inicio de sesión exitoso
+    // Redirigir a la web app (dashboard principal, aún no integrada)
     router.push('/portfolios');
   };
 

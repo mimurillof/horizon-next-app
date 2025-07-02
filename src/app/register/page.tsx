@@ -38,7 +38,7 @@ export default function RegisterPage() {
       gender,
     });
 
-    router.push('/'); // Redirige al login tras registro exitoso
+    router.push('/portfolios/create'); // Redirige a la creación de portafolio tras registro exitoso
   };
 
   return (
@@ -263,4 +263,4 @@ export default function RegisterPage() {
       </div>
     </div>
   );
-} 
+}
