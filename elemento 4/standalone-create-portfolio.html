@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon - Crear Portafolio</title>
+    
+    <!-- Chosen Palette: Financial Tech Dark -->
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <style>
+        /* 
+         * Horizon Login System - Main Styles
+         * Financial Tech Dark Theme
+         */
+
+        /* Import Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;600&family=Poppins:wght@300;500;600&display=swap');
+
+        /* Base Styles */
+        body {
+            font-family: 'Poppins', 'Montserrat', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Background Canvas */
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(to bottom right, #0A192F, #003B46);
+        }
+
+        /* Glass Card Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            -webkit-backdrop-filter: blur(30px);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        /* Input Line Styles */
+        .input-line {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #555E68;
+            transition: border-bottom-color 0.3s ease;
+        }
+
+        .input-line:focus {
+            outline: none;
+            border-bottom: 1px solid #D4AF37;
+        }
+
+        /* Custom Checkbox */
+        .custom-checkbox:checked {
+            background-color: #E1E1E1;
+            border-color: #E1E1E1;
+        }
+
+        /* Material Symbols */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Scroll Container */
+        .scroll-container {
+            max-height: 65vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-[#0A192F]">
+    <canvas id="background-canvas"></canvas>
+    
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-sm p-8 rounded-3xl shadow-2xl text-white">
+            <!-- Header -->
+            <div class="flex flex-col items-center mb-8">
+                <!-- Logo -->
+                <div class="w-20 h-20 mb-4 flex items-center justify-center">
+                    <img src="assets/icons/icon.png" alt="Horizon Logo" class="w-20 h-20 object-contain">
+                </div>
+                <!-- Title -->
+                <h1 class="text-3xl font-medium tracking-wider text-center">Crear Nuevo Portafolio</h1>
+                <!-- Description -->
+                <p class="text-sm font-light text-gray-300 mt-2 text-center">Dale un nombre a tu nuevo portafolio de inversiones</p>
+            </div>
+            
+            <!-- Form -->
+            <form id="create-portfolio-form" class="space-y-6">
+                <!-- Portfolio Name -->
+                <div>
+                    <label for="portfolio-name" class="block text-sm font-medium text-gray-300 mb-2">
+                        Nombre del Portafolio
+                    </label>
+                    <input 
+                        id="portfolio-name" 
+                        name="portfolio-name" 
+                        type="text" 
+                        placeholder="Ej: Acciones de Tecnología, Fondos de Inversión..." 
+                        required 
+                        maxlength="50"
+                        class="input-line w-full py-2 text-white placeholder-gray-400 focus:placeholder-gray-500"
+                    >
+                    <p class="text-xs text-gray-400 mt-1" id="name-counter">Máximo 50 caracteres</p>
+                </div>
+                
+                <!-- Portfolio Description (Optional) -->
+                <div>
+                    <label for="portfolio-description" class="block text-sm font-medium text-gray-300 mb-2">
+                        Descripción (Opcional)
+                    </label>
+                    <textarea 
+                        id="portfolio-description" 
+                        name="portfolio-description" 
+                        rows="3"
+                        placeholder="Describe el propósito o estrategia de este portafolio..."
+                        maxlength="200"
+                        class="input-line w-full py-2 text-white placeholder-gray-400 focus:placeholder-gray-500 resize-none"
+                    ></textarea>
+                    <p class="text-xs text-gray-400 mt-1" id="desc-counter">Máximo 200 caracteres</p>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300">
+                        <span class="material-symbols-outlined mr-2">add_circle</span>
+                        Crear Portafolio
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Navigation Links -->
+            <div class="mt-8 space-y-3">
+                <p class="text-center">
+                    <a href="standalone-portfolios.html" class="inline-flex items-center gap-2 text-sm font-light text-gray-400 hover:text-white transition-colors">
+                        <span class="material-symbols-outlined text-sm">arrow_back</span>
+                        Volver a Mis Portafolios
+                    </a>
+                </p>
+                
+                <!-- Quick Actions -->
+                <div class="border-t border-gray-600 pt-4">
+                    <p class="text-xs text-gray-500 text-center mb-3">Acciones rápidas</p>
+                    <div class="flex justify-center gap-4">
+                        <button class="text-xs text-gray-400 hover:text-[#D4AF37] transition-colors" onclick="fillSampleData('tech')">
+                            Portafolio Tech
+                        </button>
+                        <button class="text-xs text-gray-400 hover:text-[#D4AF37] transition-colors" onclick="fillSampleData('dividends')">
+                            Fondo Dividendos
+                        </button>
+                        <button class="text-xs text-gray-400 hover:text-[#D4AF37] transition-colors" onclick="fillSampleData('crypto')">
+                            Criptomonedas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        /*
+         * Horizon Login System - Background Animation
+         * Dynamic particle network animation
+         */
+
+        class BackgroundAnimation {
+            constructor() {
+                this.canvas = document.getElementById('background-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.width = this.canvas.width = window.innerWidth;
+                this.height = this.canvas.height = window.innerHeight;
+                
+                this.particleConfig = {
+                    count: 80,
+                    speed: 0.3,
+                    maxRadius: 3,
+                    minRadius: 1,
+                    lineDistance: 150,
+                    particleColor: 'rgba(125, 249, 255, 0.8)', // #7DF9FF
+                    lineColor: 'rgba(162, 234, 196, 0.15)' // #A2EAC4
+                };
+                
+                this.particles = [];
+                this.init();
+            }
+
+            init() {
+                this.particles = this.createParticles();
+                this.setupEventListeners();
+                this.animate();
+            }
+
+            setupEventListeners() {
+                window.addEventListener('resize', () => {
+                    this.width = this.canvas.width = window.innerWidth;
+                    this.height = this.canvas.height = window.innerHeight;
+                    this.particles = this.createParticles();
+                });
+            }
+
+            createParticles() {
+                const newParticles = [];
+                for (let i = 0; i < this.particleConfig.count; i++) {
+                    newParticles.push(new Particle(this.width, this.height, this.particleConfig));
+                }
+                return newParticles;
+            }
+
+            connectParticles() {
+                for (let i = 0; i < this.particles.length; i++) {
+                    for (let j = i + 1; j < this.particles.length; j++) {
+                        const dx = this.particles[i].x - this.particles[j].x;
+                        const dy = this.particles[i].y - this.particles[j].y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < this.particleConfig.lineDistance) {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
+                            this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
+                            this.ctx.strokeStyle = this.particleConfig.lineColor;
+                            this.ctx.lineWidth = 1;
+                            this.ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                
+                this.particles.forEach(p => {
+                    p.update();
+                    p.draw(this.ctx);
+                });
+                
+                this.connectParticles();
+
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        class Particle {
+            constructor(width, height, config) {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * config.speed;
+                this.vy = (Math.random() - 0.5) * config.speed;
+                this.radius = config.minRadius + Math.random() * (config.maxRadius - config.minRadius);
+                this.config = config;
+                this.width = width;
+                this.height = height;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.config.particleColor;
+                ctx.fill();
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > this.width) this.vx *= -1;
+                if (this.y < 0 || this.y > this.height) this.vy *= -1;
+            }
+        }
+
+        // Portfolio creation functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            new BackgroundAnimation();
+            
+            const form = document.getElementById('create-portfolio-form');
+            const nameInput = document.getElementById('portfolio-name');
+            const descriptionInput = document.getElementById('portfolio-description');
+            
+            // Form submission
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const portfolioName = nameInput.value.trim();
+                if (portfolioName) {
+                    // Show success message
+                    showSuccessMessage();
+                    
+                    // Redirect after a short delay
+                    setTimeout(() => {
+                        window.location.href = `standalone-assets.html?portfolio=${encodeURIComponent(portfolioName)}`;
+                    }, 1500);
+                }
+            });
+            
+            // Character counter for name
+            nameInput.addEventListener('input', () => {
+                updateCharCount(nameInput, 50, 'name-counter');
+            });
+            
+            // Character counter for description
+            descriptionInput.addEventListener('input', () => {
+                updateCharCount(descriptionInput, 200, 'desc-counter');
+            });
+            
+            // Auto-focus on name input
+            nameInput.focus();
+        });
+        
+        // Sample data presets
+        function fillSampleData(type) {
+            const nameInput = document.getElementById('portfolio-name');
+            const descriptionInput = document.getElementById('portfolio-description');
+            
+            const presets = {
+                tech: {
+                    name: 'Acciones de Tecnología',
+                    description: 'Portafolio enfocado en empresas tecnológicas de alto crecimiento como Apple, Google, Microsoft y Tesla.'
+                },
+                dividends: {
+                    name: 'Fondo de Dividendos',
+                    description: 'Inversiones en empresas estables que pagan dividendos consistentes para generar ingresos pasivos.'
+                },
+                crypto: {
+                    name: 'Criptomonedas',
+                    description: 'Portafolio diversificado de criptomonedas incluyendo Bitcoin, Ethereum y altcoins prometedoras.'
+                }
+            };
+            
+            if (presets[type]) {
+                nameInput.value = presets[type].name;
+                descriptionInput.value = presets[type].description;
+                
+                // Trigger input events to update character counts
+                nameInput.dispatchEvent(new Event('input'));
+                descriptionInput.dispatchEvent(new Event('input'));
+            }
+        }
+        
+        // Update character count display
+        function updateCharCount(input, maxLength, counterId) {
+            const currentLength = input.value.length;
+            const counter = document.getElementById(counterId);
+            
+            if (counter) {
+                counter.textContent = `${currentLength}/${maxLength} caracteres`;
+                
+                if (currentLength > maxLength * 0.8) {
+                    counter.classList.add('text-yellow-400');
+                    counter.classList.remove('text-gray-400');
+                } else {
+                    counter.classList.add('text-gray-400');
+                    counter.classList.remove('text-yellow-400');
+                }
+            }
+        }
+        
+        // Success message
+        function showSuccessMessage() {
+            const form = document.getElementById('create-portfolio-form');
+            const originalHTML = form.innerHTML;
+            
+            form.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-green-400 mb-4">
+                        <span class="material-symbols-outlined text-6xl">check_circle</span>
+                    </div>
+                    <h3 class="text-xl text-white mb-2">¡Portafolio Creado!</h3>
+                    <p class="text-gray-300">Redirigiendo a la gestión de activos...</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

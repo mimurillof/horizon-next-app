@@ -24,3 +24,91 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* -------------------------------------------------- */
+/* Horizon shared styles moved from standalone-index */
+/* -------------------------------------------------- */
+
+/* Base Styles */
+body {
+  font-family: 'Poppins', 'Montserrat', sans-serif;
+  overflow: hidden;
+}
+
+/* Background Canvas */
+#background-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(to bottom right, #0A192F, #003B46);
+}
+
+/* Glass Card Effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Input Line Styles */
+.input-line {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid #555E68 !important;
+  transition: border-bottom-color 0.3s ease;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.input-line:focus {
+  outline: none !important;
+  border-bottom: 1px solid #D4AF37 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.input-line::placeholder {
+  color: #9CA3AF;
+}
+
+/* Custom Checkbox */
+.custom-checkbox:checked {
+  background-color: #E1E1E1;
+  border-color: #E1E1E1;
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+
+/* Scroll Container */
+.scroll-container {
+  max-height: 65vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+/* Allow dropdown overflow */
+.overflow-visible {
+  overflow: visible !important;
+}

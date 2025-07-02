@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon - Registro</title>
+    
+    <!-- Chosen Palette: Financial Tech Dark (Verde azulado oscuro, Azul petróleo, Verde menta, Cian, Blanco, Gris claro, Dorado champán, Gris titanio) -->
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=visibility,visibility_off" />
+    
+    <style>
+        /* 
+         * Horizon Login System - Main Styles
+         * Financial Tech Dark Theme
+         */
+
+        /* Import Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;600&family=Poppins:wght@300;500;600&display=swap');
+
+        /* Base Styles */
+        body {
+            font-family: 'Poppins', 'Montserrat', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Background Canvas */
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(to bottom right, #0A192F, #003B46);
+        }
+
+        /* Glass Card Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            -webkit-backdrop-filter: blur(30px);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        /* Input Line Styles */
+        .input-line {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #555E68;
+            transition: border-bottom-color 0.3s ease;
+        }
+
+        .input-line:focus {
+            outline: none;
+            border-bottom: 1px solid #D4AF37;
+        }
+
+        /* Custom Checkbox */
+        .custom-checkbox:checked {
+            background-color: #E1E1E1;
+            border-color: #E1E1E1;
+        }
+
+        /* Material Symbols */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Scroll Container (for register page) */
+        .scroll-container {
+            max-height: 65vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-[#0A192F]">
+
+    <canvas id="background-canvas"></canvas>    
+
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg p-8 rounded-3xl shadow-2xl text-white">
+              <div class="flex flex-col items-center mb-6">                <!-- Logo -->
+                <div class="w-20 h-20 mb-4 flex items-center justify-center">
+                    <img src="assets/icons/icon.png" alt="Horizon Logo" class="w-20 h-20 object-contain">
+                </div><!-- Nombre de la Marca -->
+                <h1 class="text-3xl font-medium tracking-wider">Horizon</h1>
+                <!-- Mensaje de Bienvenida -->
+                <p class="text-sm font-light text-gray-300 mt-1">Crear una nueva cuenta</p>
+            </div>
+
+            <div class="scroll-container">
+                <form action="#" method="POST" class="space-y-5">
+                    <!-- Nombre Completo -->
+                    <div>
+                        <input id="fullName" name="fullName" type="text" placeholder="Nombre completo" required class="input-line w-full py-2 text-white placeholder-gray-400 focus:placeholder-gray-500">
+                    </div>                    <!-- Email -->
+                    <div>
+                        <input id="email" name="email" type="email" placeholder="Correo electrónico" required class="input-line w-full py-2 text-white placeholder-gray-400 focus:placeholder-gray-500">
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="relative">
+                        <input id="password" name="password" type="password" placeholder="Contraseña" required class="input-line w-full pr-10 py-2 text-white placeholder-gray-400 focus:placeholder-gray-500">
+                        <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 flex items-center px-2 text-gray-400 hover:text-white transition-colors duration-200" title="Mostrar/Ocultar contraseña">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+
+                    <!-- Confirmar Contraseña -->
+                    <div class="relative">
+                        <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Confirmar contraseña" required class="input-line w-full pr-10 py-2 text-white placeholder-gray-400 focus:placeholder-gray-500">
+                        <button type="button" id="toggle-confirm-password" class="absolute inset-y-0 right-0 flex items-center px-2 text-gray-400 hover:text-white transition-colors duration-200" title="Mostrar/Ocultar contraseña">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+
+                    <!-- Fecha de Nacimiento -->
+                    <div>
+                        <input id="birthDate" name="birthDate" type="date" placeholder="Fecha de nacimiento" class="input-line w-full py-2 text-white placeholder-gray-400 focus:placeholder-gray-500">
+                    </div>
+
+                    <!-- Género -->
+                    <div>
+                        <select id="gender" name="gender" class="input-line w-full py-2 text-white bg-transparent appearance-none">
+                            <option value="" class="bg-[#0A192F] text-white">Seleccionar género</option>
+                            <option value="male" class="bg-[#0A192F] text-white">Masculino</option>
+                            <option value="female" class="bg-[#0A192F] text-white">Femenino</option>
+                            <option value="other" class="bg-[#0A192F] text-white">Otro</option>
+                            <option value="prefer-not-to-say" class="bg-[#0A192F] text-white">Prefiero no decir</option>
+                        </select>
+                    </div>                    <!-- Términos y Condiciones -->
+                    <div class="flex items-start space-x-3">
+                        <input id="terms" name="terms" type="checkbox" required class="custom-checkbox h-4 w-4 rounded-sm appearance-none border border-gray-500 focus:ring-0 mt-1">
+                        <label for="terms" class="text-sm text-gray-300 font-light">
+                            Acepto los <a href="#" class="text-[#D4AF37] hover:underline">términos y condiciones</a> y la <a href="#" class="text-[#D4AF37] hover:underline">política de privacidad</a>
+                        </label>
+                    </div>
+
+                    <!-- Botón de Registro -->
+                    <div class="pt-2">
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300">
+                            Crear Cuenta
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Separador -->
+                <div class="my-6 flex items-center">
+                    <div class="flex-grow border-t border-gray-600"></div>
+                    <span class="mx-4 flex-shrink text-sm text-gray-400">O registrarse con</span>
+                    <div class="flex-grow border-t border-gray-600"></div>
+                </div>
+
+                <!-- Opciones de Registro Social -->
+                <div class="flex justify-center space-x-4">
+                    <!-- Google -->
+                    <button class="w-12 h-12 flex items-center justify-center rounded-full border border-gray-600 hover:bg-white/10 transition-colors duration-300" title="Registrarse con Google">
+                        <svg class="w-6 h-6" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M43.611 20.083H42V20H24V28H35.303C33.674 32.69 29.223 36 24 36C17.373 36 12 30.627 12 24C12 17.373 17.373 12 24 12C27.059 12 29.842 13.154 31.961 15.039L36.842 10.323C33.413 7.199 29.002 5 24 5C13.464 5 5 13.464 5 24C5 34.536 13.464 43 24 43C34.536 43 43 34.536 43 24C43 22.618 42.872 21.328 42.611 20.083V20.083Z" fill="#FFFFFF"/></svg>
+                    </button>
+                    <!-- Microsoft -->
+                    <button class="w-12 h-12 flex items-center justify-center rounded-full border border-gray-600 hover:bg-white/10 transition-colors duration-300" title="Registrarse con Microsoft">
+                        <svg class="w-6 h-6" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1H10.3256V10.3256H1V1Z" fill="#FFFFFF"/><path d="M12.6744 1H22V10.3256H12.6744V1Z" fill="#FFFFFF"/><path d="M1 12.6744H10.3256V22H1V12.6744Z" fill="#FFFFFF"/><path d="M12.6744 12.6744H22V22H12.6744V12.6744Z" fill="#FFFFFF"/></svg>
+                    </button>
+                    <!-- LinkedIn -->
+                    <button class="w-12 h-12 flex items-center justify-center rounded-full border border-gray-600 hover:bg-white/10 transition-colors duration-300" title="Registrarse con LinkedIn">
+                         <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                    </button>
+                </div>
+
+                <!-- Enlace de Inicio de Sesión -->
+                <p class="mt-6 text-center text-sm font-light text-gray-400">
+                    ¿Ya tienes una cuenta?
+                    <a href="standalone-index.html" class="font-semibold text-white hover:text-[#D4AF37] transition-colors">
+                        Iniciar Sesión
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*
+         * Horizon Login System - Background Animation
+         * Dynamic particle network animation
+         */
+
+        class BackgroundAnimation {
+            constructor() {
+                this.canvas = document.getElementById('background-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.width = this.canvas.width = window.innerWidth;
+                this.height = this.canvas.height = window.innerHeight;
+                
+                this.particleConfig = {
+                    count: 80,
+                    speed: 0.3,
+                    maxRadius: 3,
+                    minRadius: 1,
+                    lineDistance: 150,
+                    particleColor: 'rgba(125, 249, 255, 0.8)', // #7DF9FF
+                    lineColor: 'rgba(162, 234, 196, 0.15)' // #A2EAC4
+                };
+                
+                this.particles = [];
+                this.init();
+            }
+
+            init() {
+                this.particles = this.createParticles();
+                this.setupEventListeners();
+                this.animate();
+            }
+
+            setupEventListeners() {
+                window.addEventListener('resize', () => {
+                    this.width = this.canvas.width = window.innerWidth;
+                    this.height = this.canvas.height = window.innerHeight;
+                    this.particles = this.createParticles();
+                });
+            }
+
+            createParticles() {
+                const newParticles = [];
+                for (let i = 0; i < this.particleConfig.count; i++) {
+                    newParticles.push(new Particle(this.width, this.height, this.particleConfig));
+                }
+                return newParticles;
+            }
+
+            connectParticles() {
+                for (let i = 0; i < this.particles.length; i++) {
+                    for (let j = i + 1; j < this.particles.length; j++) {
+                        const dx = this.particles[i].x - this.particles[j].x;
+                        const dy = this.particles[i].y - this.particles[j].y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < this.particleConfig.lineDistance) {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
+                            this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
+                            this.ctx.strokeStyle = this.particleConfig.lineColor;
+                            this.ctx.lineWidth = 1;
+                            this.ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                
+                this.particles.forEach(p => {
+                    p.update();
+                    p.draw(this.ctx);
+                });
+                
+                this.connectParticles();
+
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        class Particle {
+            constructor(width, height, config) {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * config.speed;
+                this.vy = (Math.random() - 0.5) * config.speed;
+                this.radius = config.minRadius + Math.random() * (config.maxRadius - config.minRadius);
+                this.config = config;
+                this.width = width;
+                this.height = height;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.config.particleColor;
+                ctx.fill();
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > this.width) this.vx *= -1;
+                if (this.y < 0 || this.y > this.height) this.vy *= -1;
+            }
+        }
+
+        /*
+         * Horizon Login System - Form Functionality
+         * Password visibility toggle and form validation
+         */
+
+        class FormHandler {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.setupPasswordToggle();
+                this.setupFormValidation();
+            }
+
+            setupPasswordToggle() {
+                // Main password toggle
+                const togglePassword = document.querySelector('#toggle-password');
+                const password = document.querySelector('#password');
+                
+                if (togglePassword && password) {
+                    togglePassword.addEventListener('click', () => {
+                        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                        password.setAttribute('type', type);
+                        togglePassword.querySelector('span').textContent = type === 'password' ? 'visibility' : 'visibility_off';
+                    });
+                }
+
+                // Confirm password toggle (register page)
+                const toggleConfirmPassword = document.querySelector('#toggle-confirm-password');
+                const confirmPassword = document.querySelector('#confirmPassword');
+                
+                if (toggleConfirmPassword && confirmPassword) {
+                    toggleConfirmPassword.addEventListener('click', () => {
+                        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+                        confirmPassword.setAttribute('type', type);
+                        toggleConfirmPassword.querySelector('span').textContent = type === 'password' ? 'visibility' : 'visibility_off';
+                    });
+                }
+            }
+
+            setupFormValidation() {
+                const password = document.querySelector('#password');
+                const confirmPassword = document.querySelector('#confirmPassword');
+
+                // Password matching validation (register page)
+                if (password && confirmPassword) {
+                    const validatePasswords = () => {
+                        if (password.value !== confirmPassword.value) {
+                            confirmPassword.setCustomValidity('Las contraseñas no coinciden');
+                        } else {
+                            confirmPassword.setCustomValidity('');
+                        }
+                    };
+
+                    confirmPassword.addEventListener('input', validatePasswords);
+                    password.addEventListener('input', () => {
+                        if (confirmPassword.value) {
+                            validatePasswords();
+                        }
+                    });
+                }
+
+                // Form submission handling
+                const forms = document.querySelectorAll('form');
+                forms.forEach(form => {
+                    form.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        
+                        if (form.checkValidity()) {
+                            // Show success message
+                            const submitBtn = form.querySelector('button[type="submit"]');
+                            const originalText = submitBtn.textContent;
+                            
+                            submitBtn.innerHTML = '¡Registro exitoso! Redirigiendo...';
+                            submitBtn.disabled = true;
+                            
+                            // Redirect to portfolios after successful registration
+                            setTimeout(() => {
+                                window.location.href = 'standalone-portfolios.html';
+                            }, 2000);
+                        } else {
+                            form.reportValidity();
+                        }
+                    });
+                });
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new BackgroundAnimation();
+            new FormHandler();
+        });
+    </script>
+</body>
+</html>
