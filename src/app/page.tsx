@@ -156,7 +156,7 @@ export default function LoginPage() {
       {/* Enlace de Registro */}
       <p className="mt-8 text-center text-sm font-light text-gray-400">
         ¿No tienes una cuenta?
-        <Link href="/register" className="font-semibold text-white hover:text-[#D4AF37] transition-colors">
+        <Link href="/register" className="font-semibold text-white hover:text-[#B4B4B4] transition-colors">
           {' '}
           Registrarte
         </Link>

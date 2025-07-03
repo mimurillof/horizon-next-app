@@ -129,7 +129,7 @@ export default function CreatePortfolioPage() {
             className="inline-flex items-center gap-2 text-sm font-light text-gray-400 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined text-sm">arrow_back</span>
-            Volver a Mis Portafolios
+            Volver al inicio
           </Link>
         </p>
 
@@ -137,21 +137,21 @@ export default function CreatePortfolioPage() {
           <p className="text-xs text-gray-500 text-center mb-3">Acciones rápidas</p>
           <div className="flex justify-center gap-4">
             <button
-              className="text-xs text-gray-400 hover:text-[#D4AF37] transition-colors"
+              className="text-xs text-gray-400 hover:text-[#B4B4B4] transition-colors"
               onClick={() => fillSampleData('tech')}
               type="button"
             >
               Portafolio Tech
             </button>
             <button
-              className="text-xs text-gray-400 hover:text-[#D4AF37] transition-colors"
+              className="text-xs text-gray-400 hover:text-[#B4B4B4] transition-colors"
               onClick={() => fillSampleData('dividends')}
               type="button"
             >
               Fondo Dividendos
             </button>
             <button
-              className="text-xs text-gray-400 hover:text-[#D4AF37] transition-colors"
+              className="text-xs text-gray-400 hover:text-[#B4B4B4] transition-colors"
               onClick={() => fillSampleData('crypto')}
               type="button"
             >

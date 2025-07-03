@@ -38,7 +38,7 @@ export default function RegisterPage() {
       gender,
     });
 
-    router.push('/portfolios/create'); // Redirige a la creación de portafolio tras registro exitoso
+    router.push('/portfolios'); // Redirige al tour de bienvenida tras registro exitoso
   };
 
   return (
@@ -172,11 +172,11 @@ export default function RegisterPage() {
             />
             <label htmlFor="terms" className="text-sm text-gray-300 font-light">
               Acepto los{' '}
-              <a href="#" className="text-[#D4AF37] hover:underline">
+              <a href="#" className="text-[#B4B4B4] hover:underline">
                 términos y condiciones
               </a>{' '}
               y la{' '}
-              <a href="#" className="text-[#D4AF37] hover:underline">
+              <a href="#" className="text-[#B4B4B4] hover:underline">
                 política de privacidad
               </a>
             </label>
@@ -255,7 +255,7 @@ export default function RegisterPage() {
         {/* Enlace inicio sesión */}
         <p className="mt-6 text-center text-sm font-light text-gray-400">
           ¿Ya tienes una cuenta?
-          <Link href="/" className="font-semibold text-white hover:text-[#D4AF37] transition-colors">
+          <Link href="/" className="font-semibold text-white hover:text-[#B4B4B4] transition-colors">
             {' '}
             Iniciar Sesión
           </Link>

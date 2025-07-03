@@ -150,11 +150,11 @@ export default function QuestionsPage({ params }: { params: { portfolioId: strin
 			<div className="flex justify-between items-center mb-6">
 				<div>
 					<Link
-						href="/portfolios/create"
+						href="/portfolios"
 						className="inline-flex items-center gap-2 text-sm font-light text-gray-400 hover:text-white transition-colors mb-2"
 					>
 						<span className="material-symbols-outlined text-sm">arrow_back</span>
-						Volver a la creación
+						Volver al inicio
 					</Link>
 					<h1 className="text-4xl font-medium tracking-wider capitalize">
 						Cuestionario para: {decodeURIComponent(portfolioId)}
@@ -368,7 +368,7 @@ export default function QuestionsPage({ params }: { params: { portfolioId: strin
 				<button
 					onClick={handleNext}
 					disabled={isNextDisabled()}
-					className="flex items-center py-3 px-6 rounded-lg text-sm font-semibold bg-[#D4AF37] text-[#0A192F] hover:bg-[#b89b30] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+					className="flex items-center py-3 px-6 rounded-lg text-sm font-semibold bg-[#B4B4B4] text-[#0A192F] hover:bg-[#B4B4B4] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{currentQuestionIndex < questions.length - 1 ? 'Siguiente' : 'Finalizar'}
 					<span className="material-symbols-outlined ml-2 text-base">arrow_forward</span>

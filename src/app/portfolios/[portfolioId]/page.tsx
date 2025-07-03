@@ -120,13 +120,13 @@ function AssetDropdown({ asset, onAssetSelect }: AssetDropdownProps) {
       </button>
       
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 bg-[#0A192F] border border-[#D4AF37] rounded-b-lg max-h-64 overflow-y-auto z-50 shadow-lg">
+        <div className="absolute top-full left-0 right-0 bg-[#0A192F] border border-[#B4B4B4] rounded-b-lg max-h-64 overflow-y-auto z-50 shadow-lg">
           <div className="p-2 border-b border-gray-600">
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-line w-full p-2 text-white bg-transparent border-b-[#D4AF37]"
+              className="input-line w-full p-2 text-white bg-transparent border-b-[#B4B4B4]"
               placeholder="Buscar por nombre o ticker..."
               autoFocus
             />
@@ -224,7 +224,7 @@ export default function AssetsPage({
         </div>
         <div className="text-right">
           <p className="text-sm text-gray-400">Valor Total</p>
-          <p className="text-2xl font-bold text-[#D4AF37]">${totalValue.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-[#B4B4B4]">${totalValue.toLocaleString()}</p>
           <p className="text-xs text-gray-500">
             {assets.length} activo{assets.length !== 1 && 's'}
           </p>
@@ -295,7 +295,7 @@ export default function AssetsPage({
       <div className="flex justify-between items-center">
         <button
           onClick={addAsset}
-          className="flex items-center py-2 px-4 rounded-lg text-sm font-semibold bg-[#D4AF37] text-[#0A192F] hover:bg-[#b89b30] transition-all duration-300"
+          className="flex items-center py-2 px-4 rounded-lg text-sm font-semibold bg-[#B4B4B4] text-[#0A192F] hover:bg-[#B4B4B4] transition-all duration-300 cursor-pointer"
         >
           <span className="material-symbols-outlined mr-2">add</span>
           Añadir Activo
@@ -304,7 +304,7 @@ export default function AssetsPage({
         <div className="flex gap-3">
           <button
             onClick={() => setAssets([])}
-            className="py-2 px-4 rounded-lg text-sm font-semibold border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300"
+            className="py-2 px-4 rounded-lg text-sm font-semibold border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 cursor-pointer"
           >
             Limpiar Todo
           </button>
@@ -321,7 +321,7 @@ export default function AssetsPage({
                 (saveBtn as HTMLButtonElement).disabled = true;
                 
                 setTimeout(() => {
-                  saveBtn.textContent = originalText || 'Guardar Cambios';
+                  saveBtn.textContent = originalText || 'Guardar y Finalizar';
                   (saveBtn as HTMLButtonElement).disabled = false;
                 }, 2000);
                 
@@ -330,9 +330,9 @@ export default function AssetsPage({
                 }, 1500);
               }
             }}
-            className="py-3 px-6 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="py-3 px-6 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            Guardar Cambios
+            Guardar y Finalizar
           </button>
         </div>
       </div>
