@@ -3,21 +3,41 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica real de autenticación.
-    console.log('Iniciando sesión con:', { username, password, rememberMe });
-    // Simular inicio de sesión exitoso
-    // Redirigir a la web app (dashboard principal, aún no integrada)
-    router.push('/portfolios');
+    setError(null);
+    setLoading(true);
+
+    try {
+      // Lógica de inicio de sesión con Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        setError(error.message);
+      } else {
+        console.log('Inicio de sesión exitoso:', data.user);
+        router.push('/portfolios');
+      }
+    } catch (err) {
+      setError('Ocurrió un error inesperado. Inténtalo de nuevo.');
+      console.error('Error de inicio de sesión:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,20 +58,28 @@ export default function LoginPage() {
         <p className="text-sm font-light text-gray-300 mt-1">¡Bienvenido de nuevo!</p>
       </div>
 
+      {/* Mensaje de error */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
+          <p className="text-red-400 text-sm text-center">{error}</p>
+        </div>
+      )}
+
       {/* Formulario de Login */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Campo de Usuario */}
+        {/* Campo de Email */}
         <div>
-          <label htmlFor="username" className="block text-sm font-light text-gray-400">
-            Usuario
+          <label htmlFor="email" className="block text-sm font-light text-gray-400">
+            Correo Electrónico
           </label>
           <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="input-line w-full mt-1 p-2 text-white"
-            placeholder="Tu nombre de usuario"
+            placeholder="Tu correo electrónico"
+            required
           />
         </div>
 
@@ -96,9 +124,10 @@ export default function LoginPage() {
         <div>
           <button
             type="submit"
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300"
+            disabled={loading}
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Iniciar Sesión
+            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
         </div>
       </form>

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AssetSelector from '@/components/AssetSelector';
+import { supabase } from '@/lib/supabaseClient';
 
 // Tipos para los activos del portfolio
 interface PortfolioAsset {
@@ -41,6 +42,23 @@ export default function AssetsPage({
 
   const [assets, setAssets] = useState<PortfolioAsset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Obtener usuario actual al montar el componente
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUser(session.user);
+        console.log('📝 [ASSETS-PAGE] Usuario actual:', session.user.id);
+      } else {
+        console.error('❌ [ASSETS-PAGE] No hay usuario autenticado');
+        router.push('/register'); // Redirigir al registro si no hay usuario
+      }
+    };
+
+    getCurrentUser();
+  }, [router]);
 
   const handleAssetsChange = (newAssets: PortfolioAsset[]) => {
     setAssets(newAssets);
@@ -49,19 +67,68 @@ export default function AssetsPage({
   const handleSavePortfolio = async () => {
     setIsLoading(true);
     
-    // Aquí puedes implementar la lógica para guardar en base de datos
-    console.log('Guardando portafolio:', {
-      portfolioId,
-      assets,
-      totalValue: getTotalValue(),
-      totalAssets: assets.length
-    });
+    try {
+      if (!currentUser?.id) {
+        throw new Error('Usuario no autenticado');
+      }
 
-    // Simular guardado
-    setTimeout(() => {
+      console.log('🔄 [SAVE-PORTFOLIO] Guardando portafolio:', {
+        portfolioId,
+        userId: currentUser.id,
+        assets: assets.length,
+        totalValue: getTotalValue()
+      });
+
+      // Guardar cada activo en la base de datos
+      const savePromises = assets.map(async (asset) => {
+        // Calcular cantidad basada en el valor de adquisición y precio actual
+        const quantity = asset.price > 0 ? asset.acquisitionValue / asset.price : 1;
+        
+        const assetData = {
+          user_id: currentUser.id,
+          portfolio_id: parseInt(portfolioId),
+          asset_symbol: asset.symbol,
+          quantity: quantity,
+          acquisition_price: asset.acquisitionValue, // Valor total pagado
+          acquisition_date: asset.acquisitionDate
+        };
+
+        console.log('📝 [SAVE-ASSET] Guardando activo:', assetData);
+
+        const response = await fetch('/api/add-asset', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(assetData),
+        });
+
+        const result = await response.json();
+        
+        if (!response.ok || !result.success) {
+          throw new Error(`Error al guardar ${asset.symbol}: ${result.error}`);
+        }
+
+        console.log('✅ [SAVE-ASSET] Activo guardado:', result.data);
+        return result.data;
+      });
+
+      // Esperar a que se guarden todos los activos
+      const savedAssets = await Promise.all(savePromises);
+      
+      console.log('✅ [SAVE-PORTFOLIO] Todos los activos guardados exitosamente:', savedAssets);
+
+      // Redirigir a la lista de portafolios
+      setTimeout(() => {
+        setIsLoading(false);
+        router.push('/portfolios');
+      }, 1000);
+
+    } catch (error) {
+      console.error('❌ [SAVE-PORTFOLIO] Error:', error);
       setIsLoading(false);
-      router.push('/portfolios');
-    }, 1500);
+      alert(error instanceof Error ? error.message : 'Error al guardar el portafolio');
+    }
   };
 
   const getTotalValue = () => {

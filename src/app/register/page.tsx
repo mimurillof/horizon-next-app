@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,29 +17,90 @@ export default function RegisterPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
+
     if (password !== confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      setError('Las contraseñas no coinciden');
+      setLoading(false);
       return;
     }
 
     if (!termsAccepted) {
-      alert('Debes aceptar los términos y condiciones');
+      setError('Debes aceptar los términos y condiciones');
+      setLoading(false);
       return;
     }
 
-    // Lógica de registro simulada
-    console.log('Registrando usuario:', {
-      fullName,
-      email,
-      password,
-      birthDate,
-      gender,
-    });
+    try {
+      // Lógica de registro con Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: fullName,
+            birth_date: birthDate,
+            gender: gender,
+          },
+        },
+      });
 
-    router.push('/portfolios'); // Redirige al tour de bienvenida tras registro exitoso
+      if (error) {
+        console.error('Error en Auth signup:', error);
+        setError(error.message);
+      } else {
+        console.log('Usuario registrado en Auth:', data.user);
+        console.log('Auth data completo:', data);
+        
+        // Insertar también en la tabla users personalizada usando API
+        if (data.user) {
+          const [firstName, ...lastNameParts] = fullName.split(' ');
+          const lastName = lastNameParts.join(' ') || '';
+          
+          console.log('Llamando API para insertar usuario en tabla users');
+          
+          const userResponse = await fetch('/api/create-user', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: data.user.id,
+              first_name: firstName,
+              last_name: lastName,
+              email: email,
+              birth_date: birthDate,
+              gender: gender
+            })
+          });
+
+          const userResult = await userResponse.json();
+
+          if (!userResponse.ok) {
+            console.error('Error en API create-user:', userResult);
+            setError(`Usuario creado en Auth pero falló el perfil: ${userResult.message}`);
+          } else {
+            console.log('✅ Usuario insertado exitosamente:', userResult);
+          }
+        } else {
+          console.warn('⚠️ data.user es null - posible confirmación de email requerida');
+          console.log('Data completo recibido:', data);
+        }
+        
+        router.push('/portfolios'); // Redirige al tour de bienvenida tras registro exitoso
+      }
+    } catch (err) {
+      setError('Ocurrió un error inesperado. Inténtalo de nuevo.');
+      console.error('Error de registro:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,6 +113,13 @@ export default function RegisterPage() {
         <h1 className="text-3xl font-medium tracking-wider">Horizon</h1>
         <p className="text-sm font-light text-gray-300 mt-1">Crear una nueva cuenta</p>
       </div>
+
+      {/* Mensaje de error */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
+          <p className="text-red-400 text-sm text-center">{error}</p>
+        </div>
+      )}
 
       {/* Formulario dentro de contenedor scrollable */}
       <div className="max-h-[65vh] overflow-y-auto pr-1">
@@ -154,7 +223,7 @@ export default function RegisterPage() {
               <option value="other" className="bg-[#0A192F] text-white">
                 Otro
               </option>
-              <option value="prefer-not-to-say" className="bg-[#0A192F] text-white">
+              <option value="prefer_not_to_say" className="bg-[#0A192F] text-white">
                 Prefiero no decir
               </option>
             </select>
@@ -186,9 +255,10 @@ export default function RegisterPage() {
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300"
+              disabled={loading}
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Crear Cuenta
+              {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
             </button>
           </div>
         </form>

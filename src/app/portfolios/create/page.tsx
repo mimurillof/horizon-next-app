@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabaseClient';
 
 const MAX_NAME = 50;
 const MAX_DESC = 200;
@@ -13,6 +14,25 @@ export default function CreatePortfolioPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [created, setCreated] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Obtener usuario actual al montar el componente
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUser(session.user);
+        console.log('📝 [CREATE-PORTFOLIO] Usuario actual:', session.user.id);
+      } else {
+        console.error('❌ [CREATE-PORTFOLIO] No hay usuario autenticado');
+        router.push('/register'); // Redirigir al registro si no hay usuario
+      }
+    };
+
+    getCurrentUser();
+  }, [router]);
 
   // Relleno rápido
   const fillSampleData = (type: 'tech' | 'dividends' | 'crypto') => {
@@ -32,23 +52,65 @@ export default function CreatePortfolioPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validaciones básicas
     if (!name.trim()) {
-      alert('El nombre es obligatorio');
+      setError('El nombre es obligatorio');
       return;
     }
 
-    console.log('Nuevo portafolio creado:', { name, description });
+    if (!currentUser?.id) {
+      setError('Usuario no autenticado');
+      return;
+    }
 
-    // Mostrar mensaje de éxito y redirigir a la página de assets
-    setCreated(true);
+    setLoading(true);
+    setError('');
 
-    setTimeout(() => {
-      router.push(`/portfolios/${encodeURIComponent(name)}/questions`);
-    }, 1500);
+    try {
+      console.log('📝 [CREATE-PORTFOLIO] Enviando datos:', { 
+        user_id: currentUser.id,
+        portfolio_name: name.trim(), 
+        description: description.trim() 
+      });
+
+      const response = await fetch('/api/create-portfolio', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          portfolio_name: name.trim(),
+          description: description.trim() || ''
+        }),
+      });
+
+      const result = await response.json();
+      console.log('📝 [CREATE-PORTFOLIO] Respuesta de la API:', result);
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Error al crear el portafolio');
+      }
+
+      console.log('✅ [CREATE-PORTFOLIO] Portafolio creado exitosamente:', result.data);
+
+      // Mostrar mensaje de éxito y redirigir
+      setCreated(true);
+
+      setTimeout(() => {
+        // Usar el ID real del portafolio creado en lugar del nombre
+        router.push(`/portfolios/${result.data.portfolio_id}/questions`);
+      }, 1500);
+
+    } catch (error) {
+      console.error('❌ [CREATE-PORTFOLIO] Error:', error);
+      setError(error instanceof Error ? error.message : 'Error al crear el portafolio');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,6 +128,13 @@ export default function CreatePortfolioPage() {
 
       {!created ? (
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Mostrar errores */}
+          {error && (
+            <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
           {/* Nombre */}
           <div>
             <label htmlFor="portfolio-name" className="block text-sm font-medium text-gray-300 mb-2">
@@ -104,10 +173,20 @@ export default function CreatePortfolioPage() {
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300"
+              disabled={loading}
+              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="material-symbols-outlined mr-2">add_circle</span>
-              Crear Portafolio
+              {loading ? (
+                <>
+                  <span className="animate-spin mr-2">⌛</span>
+                  Creando...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined mr-2">add_circle</span>
+                  Crear Portafolio
+                </>
+              )}
             </button>
           </div>
         </form>

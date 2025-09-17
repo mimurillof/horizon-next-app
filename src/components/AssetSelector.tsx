@@ -91,14 +91,15 @@ export default function AssetSelector({ onAssetsChange, initialAssets = [] }: As
     setError(null);
     
     try {
-      const response = await fetch(`/api/search-assets?query=${encodeURIComponent(query)}`);
+      // Cambiar a usar Yahoo Finance API
+      const response = await fetch(`/api/yahoo-search-assets?query=${encodeURIComponent(query)}`);
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || 'Error en la búsqueda');
+        throw new Error(data.error || 'Error en la búsqueda');
       }
       
-      setSearchResults(data);
+      setSearchResults(data.data || []);
       setShowDropdown(true);
     } catch (error) {
       console.error('Error searching assets:', error);
@@ -121,13 +122,23 @@ export default function AssetSelector({ onAssetsChange, initialAssets = [] }: As
     setError(null);
     
     try {
-      const response = await fetch(`/api/get-asset-profile?symbol=${encodeURIComponent(asset.symbol)}`);
-      const profileData = await response.json();
+      // Cambiar a usar Yahoo Finance API
+      const response = await fetch(`/api/yahoo-get-asset-profile?symbol=${encodeURIComponent(asset.symbol)}`);
+      const result = await response.json();
       
       if (!response.ok) {
-        throw new Error(profileData.message || 'Error al obtener perfil del activo');
+        // Mostrar error más específico al usuario
+        const errorMsg = result.error || 'Error al obtener perfil del activo';
+        console.error('Yahoo API Error:', result);
+        
+        if (response.status === 404) {
+          throw new Error(`${asset.symbol} no se encuentra. Verifica que el símbolo sea correcto.`);
+        } else {
+          throw new Error(errorMsg);
+        }
       }
 
+      const profileData = result.data;
       const newAsset: PortfolioAsset = {
         ...profileData,
         acquisitionDate: new Date().toISOString().split('T')[0],

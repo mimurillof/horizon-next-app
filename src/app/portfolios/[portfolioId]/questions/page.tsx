@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { supabase } from '@/lib/supabaseClient';
 
 // Tipos para las respuestas
 interface ProfileDateAnswer {
@@ -88,6 +89,24 @@ export default function QuestionsPage({ params }: { params: { portfolioId: strin
 	const router = useRouter();
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [answers, setAnswers] = useState<Record<number, QuestionAnswer>>({});
+	const [currentUser, setCurrentUser] = useState<any>(null);
+	const [saving, setSaving] = useState(false);
+
+	// Obtener usuario actual al montar el componente
+	useEffect(() => {
+		const getCurrentUser = async () => {
+			const { data: { session } } = await supabase.auth.getSession();
+			if (session?.user) {
+				setCurrentUser(session.user);
+				console.log('📝 [QUESTIONS] Usuario actual:', session.user.id);
+			} else {
+				console.error('❌ [QUESTIONS] No hay usuario autenticado');
+				router.push('/register');
+			}
+		};
+
+		getCurrentUser();
+	}, [router]);
 
 	const currentQuestion = questions[currentQuestionIndex];
 
@@ -95,13 +114,72 @@ export default function QuestionsPage({ params }: { params: { portfolioId: strin
 		setAnswers((prev) => ({ ...prev, [questionId]: value }));
 	};
 
-	const handleNext = () => {
+	const handleNext = async () => {
 		if (currentQuestionIndex < questions.length - 1) {
 			setCurrentQuestionIndex(currentQuestionIndex + 1);
 		} else {
-			// Navegar a la página de selección de activos después de la última pregunta
-			console.log('Respuestas finales:', answers);
-			router.push(`/portfolios/${portfolioId}`);
+			// Última pregunta - guardar evaluación de riesgo y navegar
+			setSaving(true);
+			
+			try {
+				if (!currentUser?.id) {
+					throw new Error('Usuario no autenticado');
+				}
+
+				// Extraer respuestas del cuestionario
+				const purpose = answers[1] as string; // Pregunta 1: ¿Para qué es este dinero?
+				let timeHorizon = '';
+				
+				// Pregunta 2: ¿Cuándo necesitará el dinero?
+				const question2Answer = answers[2];
+				if (typeof question2Answer === 'string') {
+					timeHorizon = question2Answer;
+				} else if (typeof question2Answer === 'object' && question2Answer.profile) {
+					timeHorizon = question2Answer.profile;
+				}
+				
+				const riskReaction = answers[3] as string; // Pregunta 3: Reacción al riesgo
+
+				console.log('📝 [QUESTIONS] Guardando evaluación de riesgo:', {
+					portfolioId,
+					userId: currentUser.id,
+					purpose,
+					timeHorizon,
+					riskReaction
+				});
+
+				// Llamar a la API para guardar la evaluación
+				const response = await fetch('/api/save-risk-assessment', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						user_id: currentUser.id,
+						portfolio_id: parseInt(portfolioId),
+						purpose: purpose,
+						time_horizon: timeHorizon,
+						risk_reaction: riskReaction
+					}),
+				});
+
+				const result = await response.json();
+				
+				if (!response.ok || !result.success) {
+					throw new Error(result.error || 'Error al guardar evaluación de riesgo');
+				}
+
+				console.log('✅ [QUESTIONS] Evaluación guardada exitosamente:', result.data);
+
+				// Navegar a la página de selección de activos
+				router.push(`/portfolios/${portfolioId}`);
+				
+			} catch (error) {
+				console.error('❌ [QUESTIONS] Error al guardar evaluación:', error);
+				alert(error instanceof Error ? error.message : 'Error al guardar la evaluación de riesgo');
+			} finally {
+				setSaving(false);
+			}
 		}
 	};
 
@@ -367,11 +445,20 @@ export default function QuestionsPage({ params }: { params: { portfolioId: strin
 				</button>
 				<button
 					onClick={handleNext}
-					disabled={isNextDisabled()}
+					disabled={isNextDisabled() || saving}
 					className="flex items-center py-3 px-6 rounded-lg text-sm font-semibold bg-[#B4B4B4] text-[#0A192F] hover:bg-[#B4B4B4] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
-					{currentQuestionIndex < questions.length - 1 ? 'Siguiente' : 'Finalizar'}
-					<span className="material-symbols-outlined ml-2 text-base">arrow_forward</span>
+					{saving ? (
+						<>
+							<span className="animate-spin mr-2">⌛</span>
+							Guardando...
+						</>
+					) : (
+						<>
+							{currentQuestionIndex < questions.length - 1 ? 'Siguiente' : 'Finalizar'}
+							<span className="material-symbols-outlined ml-2 text-base">arrow_forward</span>
+						</>
+					)}
 				</button>
 			</div>
 		</div>
