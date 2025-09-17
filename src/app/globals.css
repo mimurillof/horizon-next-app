@@ -112,3 +112,48 @@ body {
 .overflow-visible {
   overflow: visible !important;
 }
+
+/* Asset Selector specific styles */
+.asset-dropdown {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(10, 25, 47, 0.9);
+  border: 1px solid rgba(180, 180, 180, 0.2);
+}
+
+.asset-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.asset-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.asset-dropdown::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.asset-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Improved focus states */
+.input-line:focus-within {
+  border-bottom-color: #D4AF37 !important;
+  box-shadow: 0 1px 0 0 #D4AF37 !important;
+}

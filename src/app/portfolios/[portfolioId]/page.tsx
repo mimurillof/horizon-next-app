@@ -1,169 +1,34 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import AssetSelector from '@/components/AssetSelector';
 
-interface AssetData {
-  name: string;
-  ticker: string;
-  logo: string;
+// Tipos para los activos del portfolio
+interface PortfolioAsset {
+  symbol: string;
+  companyName: string;
+  price: number;
+  changes: number;
+  changesPercentage: number;
+  exchange: string;
+  exchangeShortName: string;
+  industry: string;
   sector: string;
-}
-
-interface Asset {
-  id: number;
-  assetData?: AssetData;
-  value: number; // USD
-  acquisitionDate?: string; // Nueva propiedad para la fecha
-}
-
-// Simulated assets data
-const assetsData: AssetData[] = [
-  { name: "Apple Inc.", ticker: "AAPL", logo: "https://logo.clearbit.com/apple.com", sector: "Technology" },
-  { name: "Google LLC", ticker: "GOOGL", logo: "https://logo.clearbit.com/google.com", sector: "Technology" },
-  { name: "Microsoft Corporation", ticker: "MSFT", logo: "https://logo.clearbit.com/microsoft.com", sector: "Technology" },
-  { name: "Amazon.com, Inc.", ticker: "AMZN", logo: "https://logo.clearbit.com/amazon.com", sector: "E-commerce" },
-  { name: "Tesla, Inc.", ticker: "TSLA", logo: "https://logo.clearbit.com/tesla.com", sector: "Automotive" },
-  { name: "NVIDIA Corporation", ticker: "NVDA", logo: "https://logo.clearbit.com/nvidia.com", sector: "Technology" },
-  { name: "Meta Platforms, Inc.", ticker: "META", logo: "https://logo.clearbit.com/meta.com", sector: "Technology" },
-  { name: "Berkshire Hathaway Inc.", ticker: "BRK.B", logo: "https://logo.clearbit.com/berkshirehathaway.com", sector: "Finance" },
-  { name: "JPMorgan Chase & Co.", ticker: "JPM", logo: "https://logo.clearbit.com/jpmorganchase.com", sector: "Finance" },
-  { name: "Exxon Mobil Corporation", ticker: "XOM", logo: "https://logo.clearbit.com/exxonmobil.com", sector: "Energy" },
-  { name: "Johnson & Johnson", ticker: "JNJ", logo: "https://logo.clearbit.com/jnj.com", sector: "Healthcare" },
-  { name: "Procter & Gamble Co.", ticker: "PG", logo: "https://logo.clearbit.com/pg.com", sector: "Consumer Goods" },
-];
-
-interface AssetDropdownProps {
-  asset: Asset;
-  onAssetSelect: (assetData: AssetData) => void;
-}
-
-function AssetDropdown({ asset, onAssetSelect }: AssetDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const filteredAssets = assetsData.filter(assetData =>
-    assetData.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    assetData.ticker.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    assetData.sector.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    // Add overflow-visible class to parent containers when dropdown is open
-    if (isOpen) {
-      const assetsList = document.querySelector('.max-h-\\[65vh\\]');
-      const glassCard = document.querySelector('.glass-card');
-      
-      if (assetsList) assetsList.classList.add('overflow-visible');
-      if (glassCard) glassCard.classList.add('overflow-visible');
-    } else {
-      const assetsList = document.querySelector('.max-h-\\[65vh\\]');
-      const glassCard = document.querySelector('.glass-card');
-      
-      if (assetsList) assetsList.classList.remove('overflow-visible');
-      if (glassCard) glassCard.classList.remove('overflow-visible');
-    }
-
-    return () => {
-      const assetsList = document.querySelector('.max-h-\\[65vh\\]');
-      const glassCard = document.querySelector('.glass-card');
-      
-      if (assetsList) assetsList.classList.remove('overflow-visible');
-      if (glassCard) glassCard.classList.remove('overflow-visible');
-    };
-  }, [isOpen]);
-
-  return (
-    <div className="relative flex-grow" ref={dropdownRef}>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="input-line w-full text-left py-2 flex justify-between items-center"
-      >
-        <span className="flex items-center gap-3">
-          {asset.assetData ? (
-            <>
-              <img 
-                src={asset.assetData.logo} 
-                className="w-6 h-6 rounded-full object-cover bg-gray-600" 
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                alt={asset.assetData.name}
-              />
-              <div>
-                <div>{asset.assetData.name}</div>
-                <div className="text-xs text-gray-500">{asset.assetData.ticker} • {asset.assetData.sector}</div>
-              </div>
-            </>
-          ) : (
-            <>
-              <span className="material-symbols-outlined text-gray-400">search</span>
-              <span className="text-gray-400">Seleccionar o buscar un activo...</span>
-            </>
-          )}
-        </span>
-        <span className="material-symbols-outlined">
-          {isOpen ? 'arrow_drop_up' : 'arrow_drop_down'}
-        </span>
-      </button>
-      
-      {isOpen && (
-        <div className="absolute top-full left-0 right-0 bg-[#0A192F] border border-[#B4B4B4] rounded-b-lg max-h-64 overflow-y-auto z-50 shadow-lg">
-          <div className="p-2 border-b border-gray-600">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-line w-full p-2 text-white bg-transparent border-b-[#B4B4B4]"
-              placeholder="Buscar por nombre o ticker..."
-              autoFocus
-            />
-          </div>
-          <div className="max-h-48 overflow-y-auto">
-            {filteredAssets.length === 0 ? (
-              <div className="p-4 text-gray-400 text-center">No se encontraron activos</div>
-            ) : (
-              filteredAssets.map((assetData) => (
-                <button
-                  key={assetData.ticker}
-                  type="button"
-                  onClick={() => {
-                    onAssetSelect(assetData);
-                    setIsOpen(false);
-                    setSearchTerm('');
-                  }}
-                  className="w-full text-left p-3 hover:bg-[#003B46] transition-colors flex items-center gap-3 text-white"
-                >
-                  <img 
-                    src={assetData.logo} 
-                    className="w-6 h-6 rounded-full object-cover bg-gray-600" 
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    alt={assetData.name}
-                  />
-                  <div>
-                    <div>{assetData.name}</div>
-                    <div className="text-xs text-gray-500">{assetData.ticker} • {assetData.sector}</div>
-                  </div>
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  currency: string;
+  image: string;
+  description: string;
+  website: string;
+  ceo: string;
+  country: string;
+  ipoDate: string;
+  marketCap: number;
+  fullTimeEmployees: number;
+  lastUpdated: string;
+  acquisitionDate: string;
+  acquisitionValue: number;
+  id: string;
 }
 
 export default function AssetsPage({
@@ -174,38 +39,34 @@ export default function AssetsPage({
   const { portfolioId } = params;
   const router = useRouter();
 
-  const [assets, setAssets] = useState<Asset[]>([]);
+  const [assets, setAssets] = useState<PortfolioAsset[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const addAsset = () => {
-    setAssets((prev) => [
-      ...prev,
-      { id: Date.now(), value: 0, acquisitionDate: '' },
-    ]);
+  const handleAssetsChange = (newAssets: PortfolioAsset[]) => {
+    setAssets(newAssets);
   };
 
-  const updateAssetData = (id: number, assetData: AssetData) => {
-    setAssets((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, assetData } : a))
-    );
+  const handleSavePortfolio = async () => {
+    setIsLoading(true);
+    
+    // Aquí puedes implementar la lógica para guardar en base de datos
+    console.log('Guardando portafolio:', {
+      portfolioId,
+      assets,
+      totalValue: getTotalValue(),
+      totalAssets: assets.length
+    });
+
+    // Simular guardado
+    setTimeout(() => {
+      setIsLoading(false);
+      router.push('/portfolios');
+    }, 1500);
   };
 
-  const updateAssetValue = (id: number, value: number) => {
-    setAssets((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, value } : a))
-    );
+  const getTotalValue = () => {
+    return assets.reduce((sum, asset) => sum + (asset.acquisitionValue || 0), 0);
   };
-
-  const updateAssetAcquisitionDate = (id: number, date: string) => {
-    setAssets((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, acquisitionDate: date } : a))
-    );
-  };
-
-  const removeAsset = (id: number) => {
-    setAssets((prev) => prev.filter((a) => a.id !== id));
-  };
-
-  const totalValue = assets.reduce((sum, a) => sum + (a.value || 0), 0);
 
   return (
     <div className="glass-card w-full max-w-4xl p-8 rounded-3xl shadow-2xl text-white">
@@ -224,115 +85,47 @@ export default function AssetsPage({
         </div>
         <div className="text-right">
           <p className="text-sm text-gray-400">Valor Total</p>
-          <p className="text-2xl font-bold text-[#B4B4B4]">${totalValue.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-[#B4B4B4]">${getTotalValue().toLocaleString()}</p>
           <p className="text-xs text-gray-500">
             {assets.length} activo{assets.length !== 1 && 's'}
           </p>
         </div>
       </div>
 
-      {/* Assets list */}
-      <div className="max-h-[65vh] overflow-y-auto pr-4 space-y-3 mb-6">
-        {assets.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <span className="material-symbols-outlined text-6xl">trending_up</span>
-            </div>
-            <h3 className="text-xl text-gray-300 mb-2">No hay activos en este portafolio</h3>
-            <p className="text-gray-400">Agrega tu primer activo para comenzar</p>
-          </div>
-        ) : (
-          assets.map((asset) => (
-            <div
-              key={asset.id}
-              className="flex items-end gap-2 p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-end gap-1 sm:gap-2 flex-1">
-                <div className="flex flex-col flex-1 min-w-0">
-                  <label className="block text-xs text-gray-400 mb-1">Activo</label>
-                  <AssetDropdown
-                    asset={asset}
-                    onAssetSelect={(assetData) => updateAssetData(asset.id, assetData)}
-                  />
-                </div>
-                <div className="flex-shrink-0">
-                  <label htmlFor={`acquisition-date-${asset.id}`} className="block text-xs text-gray-400 mb-1">Fecha de adquisición</label>
-                  <input
-                    id={`acquisition-date-${asset.id}`}
-                    type="date"
-                    value={asset.acquisitionDate || ''}
-                    onChange={(e) => updateAssetAcquisitionDate(asset.id, e.target.value)}
-                    className="input-line w-36 py-2 text-white placeholder-gray-400"
-                    max={new Date().toISOString().split('T')[0]}
-                  />
-                </div>
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    value={asset.value || ''}
-                    onChange={(e) => updateAssetValue(asset.id, parseFloat(e.target.value) || 0)}
-                    className="input-line w-28 py-2 text-white placeholder-gray-400 text-right"
-                    placeholder="Valor actual"
-                  />
-                  <span className="text-xs text-gray-500">USD</span>
-                </div>
-              </div>
-              <button
-                onClick={() => removeAsset(asset.id)}
-                className="text-gray-400 hover:text-red-500 transition-colors p-2"
-                title="Eliminar activo"
-              >
-                <span className="material-symbols-outlined">delete</span>
-              </button>
-            </div>
-          ))
-        )}
+      {/* Asset Selector Component */}
+      <div className="mb-6">
+        <AssetSelector 
+          onAssetsChange={handleAssetsChange}
+          initialAssets={assets}
+        />
       </div>
 
       {/* Action buttons */}
       <div className="flex justify-between items-center">
         <button
-          onClick={addAsset}
-          className="flex items-center py-2 px-4 rounded-lg text-sm font-semibold bg-[#B4B4B4] text-[#0A192F] hover:bg-[#B4B4B4] transition-all duration-300 cursor-pointer"
+          onClick={() => setAssets([])}
+          className="py-2 px-4 rounded-lg text-sm font-semibold border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 cursor-pointer"
         >
-          <span className="material-symbols-outlined mr-2">add</span>
-          Añadir Activo
+          Limpiar Todo
         </button>
 
         <div className="flex gap-3">
           <button
-            onClick={() => setAssets([])}
-            className="py-2 px-4 rounded-lg text-sm font-semibold border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 cursor-pointer"
+            onClick={handleSavePortfolio}
+            disabled={isLoading || assets.length === 0}
+            className="py-3 px-6 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center"
           >
-            Limpiar Todo
-          </button>
-          <button
-            id="save-portfolio-btn"
-            onClick={() => {
-              const saveBtn = document.getElementById('save-portfolio-btn');
-              if (saveBtn) {
-                const originalText = saveBtn.textContent;
-                saveBtn.innerHTML = `
-                  <span class="material-symbols-outlined mr-2">check_circle</span>
-                  ¡Portafolio guardado exitosamente!
-                `;
-                (saveBtn as HTMLButtonElement).disabled = true;
-                
-                setTimeout(() => {
-                  saveBtn.textContent = originalText || 'Guardar y Finalizar';
-                  (saveBtn as HTMLButtonElement).disabled = false;
-                }, 2000);
-                
-                setTimeout(() => {
-                  router.push('/portfolios');
-                }, 1500);
-              }
-            }}
-            className="py-3 px-6 border border-transparent rounded-lg shadow-sm text-md font-semibold text-[#0A192F] bg-[#E1E1E1] hover:bg-gray-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          >
-            Guardar y Finalizar
+            {isLoading ? (
+              <>
+                <span className="material-symbols-outlined mr-2 animate-spin">refresh</span>
+                Guardando...
+              </>
+            ) : (
+              <>
+                <span className="material-symbols-outlined mr-2">save</span>
+                Guardar y Finalizar
+              </>
+            )}
           </button>
         </div>
       </div>
