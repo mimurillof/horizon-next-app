@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AssetSelector from '@/components/AssetSelector';
@@ -35,14 +35,14 @@ interface PortfolioAsset {
 export default function AssetsPage({
   params,
 }: {
-  params: { portfolioId: string };
+  params: Promise<{ portfolioId: string }>;
 }) {
-  const { portfolioId } = params;
+  const { portfolioId } = use(params);
   const router = useRouter();
 
   const [assets, setAssets] = useState<PortfolioAsset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
 
   // Obtener usuario actual al montar el componente
   useEffect(() => {

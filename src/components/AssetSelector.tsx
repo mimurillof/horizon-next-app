@@ -222,7 +222,7 @@ export default function AssetSelector({ onAssetsChange, initialAssets = [] }: As
               
               {!loading && searchResults.length === 0 && searchTerm.length >= 2 && (
                 <div className="p-4 text-center text-gray-400">
-                  No se encontraron resultados para "{searchTerm}"
+                  No se encontraron resultados para &quot;{searchTerm}&quot;
                 </div>
               )}
               

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -84,12 +84,12 @@ const questions = [
 	// Aquí se pueden agregar más preguntas
 ];
 
-export default function QuestionsPage({ params }: { params: { portfolioId: string } }) {
-	const { portfolioId } = params;
+export default function QuestionsPage({ params }: { params: Promise<{ portfolioId: string }> }) {
+	const { portfolioId } = use(params);
 	const router = useRouter();
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [answers, setAnswers] = useState<Record<number, QuestionAnswer>>({});
-	const [currentUser, setCurrentUser] = useState<any>(null);
+	const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
 	const [saving, setSaving] = useState(false);
 
 	// Obtener usuario actual al montar el componente

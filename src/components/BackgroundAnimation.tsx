@@ -60,7 +60,7 @@ class Particle {
  */
 const BackgroundAnimation = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrame = useRef<number>();
+  const animationFrame = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const canvas = canvasRef.current;

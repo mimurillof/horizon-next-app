@@ -16,7 +16,7 @@ export default function CreatePortfolioPage() {
   const [created, setCreated] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
 
   // Obtener usuario actual al montar el componente
   useEffect(() => {

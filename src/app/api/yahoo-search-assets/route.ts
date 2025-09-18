@@ -19,7 +19,7 @@ async function searchYahooFinance(query: string) {
     const data = await response.json();
     
     // Formatear resultados para que coincidan con el formato esperado
-    const formattedResults = data.quotes?.slice(0, 10).map((quote: any) => ({
+    const formattedResults = data.quotes?.slice(0, 10).map((quote: { symbol: string; longname?: string; shortname?: string; exchange?: string; quoteType?: string }) => ({
       symbol: quote.symbol,
       name: quote.longname || quote.shortname || quote.symbol,
       exchangeShortName: quote.exchange || 'Unknown',

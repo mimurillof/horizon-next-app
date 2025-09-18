@@ -32,14 +32,14 @@ export async function GET(request: NextRequest) {
     const data = await apiRes.json();
     
     // Filtrar y formatear los resultados para mostrar solo la información relevante
-    const formattedData = data.map((item: any) => ({
+    const searchResults = data.map((item: { symbol: string; name: string; exchangeShortName: string; type: string }) => ({
       symbol: item.symbol,
       name: item.name,
       exchangeShortName: item.exchangeShortName,
       type: item.type || 'stock'
     }));
     
-    return NextResponse.json(formattedData);
+    return NextResponse.json(searchResults);
   } catch (error) {
     console.error('Error en search-assets:', error);
     return NextResponse.json(

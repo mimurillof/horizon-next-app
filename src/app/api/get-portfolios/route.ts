@@ -3,8 +3,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function GET(request: NextRequest) {
   try {
-    // Extraer el user_id del header de Authorization o query params
-    const authHeader = request.headers.get('Authorization');
+    // Extraer el user_id del query params
     const userId = request.nextUrl.searchParams.get('user_id');
     
     if (!userId) {
@@ -39,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Formatear la respuesta con conteo de activos
-    const formattedPortfolios = portfolios?.map((portfolio: any) => ({
+    const formattedPortfolios = portfolios?.map((portfolio: { portfolio_id: number; portfolio_name: string; description: string; created_at: string; assets: unknown[] }) => ({
       ...portfolio,
       assetCount: portfolio.assets?.length || 0,
       assets: undefined // Remover el array de assets de la respuesta
