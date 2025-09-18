@@ -10,8 +10,6 @@
   },
   "dependencies": {
     "@radix-ui/react-radio-group": "^1.3.7",
-    "@stagewise-plugins/react": "^0.4.9",
-    "@stagewise/toolbar-next": "^0.4.9",
     "@supabase/supabase-js": "^2.57.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
