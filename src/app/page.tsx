@@ -30,7 +30,8 @@ export default function LoginPage() {
         setError(error.message);
       } else {
         console.log('Inicio de sesión exitoso:', data.user);
-        router.push('/portfolios');
+        // Redirigir a la aplicación externa
+        window.location.href = 'https://mi-proyecto-topaz-omega.vercel.app/';
       }
     } catch (err) {
       setError('Ocurrió un error inesperado. Inténtalo de nuevo.');
