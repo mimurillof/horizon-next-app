@@ -17,17 +17,42 @@ export default function CreatePortfolioPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   // Obtener usuario actual al montar el componente
   useEffect(() => {
     const getCurrentUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setCurrentUser(session.user);
-        console.log('📝 [CREATE-PORTFOLIO] Usuario actual:', session.user.id);
-      } else {
-        console.error('❌ [CREATE-PORTFOLIO] No hay usuario autenticado');
-        router.push('/register'); // Redirigir al registro si no hay usuario
+      try {
+        console.log('🔍 [CREATE-PORTFOLIO] Verificando sesión...');
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('❌ [CREATE-PORTFOLIO] Error al obtener sesión:', sessionError);
+        }
+
+        if (session?.user) {
+          setCurrentUser(session.user);
+          console.log('✅ [CREATE-PORTFOLIO] Usuario autenticado:', session.user.id);
+        } else {
+          console.warn('⚠️ [CREATE-PORTFOLIO] No hay sesión activa');
+          // Esperar un poco más por si la sesión está siendo establecida
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Intentar una vez más
+          const { data: { session: retrySession } } = await supabase.auth.getSession();
+          if (retrySession?.user) {
+            setCurrentUser(retrySession.user);
+            console.log('✅ [CREATE-PORTFOLIO] Usuario autenticado (segundo intento):', retrySession.user.id);
+          } else {
+            console.error('❌ [CREATE-PORTFOLIO] No hay usuario autenticado después de reintentar');
+            // Redirigir al login (página principal) en lugar de registro
+            router.push('/');
+          }
+        }
+      } catch (err) {
+        console.error('❌ [CREATE-PORTFOLIO] Error inesperado:', err);
+      } finally {
+        setCheckingAuth(false);
       }
     };
 
@@ -112,6 +137,21 @@ export default function CreatePortfolioPage() {
       setLoading(false);
     }
   };
+
+  // Mostrar pantalla de carga mientras se verifica autenticación
+  if (checkingAuth) {
+    return (
+      <div className="glass-card w-full max-w-sm p-8 rounded-3xl shadow-2xl text-white">
+        <div className="text-center py-8">
+          <div className="mb-4 flex justify-center">
+            <span className="animate-spin text-6xl">⌛</span>
+          </div>
+          <h3 className="text-xl text-white mb-2">Verificando sesión...</h3>
+          <p className="text-gray-300">Un momento por favor</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="glass-card w-full max-w-sm p-8 rounded-3xl shadow-2xl text-white">

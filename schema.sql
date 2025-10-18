@@ -16,6 +16,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) DEFAULT 'handled_by_supabase_auth', -- Solo referencia
     birth_date DATE,
     gender gender_enum,
+    has_completed_onboarding BOOLEAN DEFAULT FALSE, -- Indica si completó el tour y configuración inicial
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

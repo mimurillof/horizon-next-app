@@ -43,8 +43,10 @@ export default function AssetsPage({
   const [assets, setAssets] = useState<PortfolioAsset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
+  const [portfolioName, setPortfolioName] = useState<string>('');
+  const [loadingPortfolio, setLoadingPortfolio] = useState(true);
 
-  // Obtener usuario actual al montar el componente
+  // Obtener usuario actual y nombre del portafolio al montar el componente
   useEffect(() => {
     const getCurrentUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -57,8 +59,33 @@ export default function AssetsPage({
       }
     };
 
+    const getPortfolioName = async () => {
+      try {
+        console.log('📂 [ASSETS-PAGE] Obteniendo nombre del portafolio:', portfolioId);
+        const { data, error } = await supabase
+          .from('portfolios')
+          .select('portfolio_name')
+          .eq('portfolio_id', portfolioId)
+          .single();
+
+        if (error) {
+          console.error('❌ [ASSETS-PAGE] Error al obtener portafolio:', error);
+          setPortfolioName(`Portafolio ${portfolioId}`); // Fallback
+        } else {
+          console.log('✅ [ASSETS-PAGE] Nombre del portafolio:', data.portfolio_name);
+          setPortfolioName(data.portfolio_name);
+        }
+      } catch (err) {
+        console.error('❌ [ASSETS-PAGE] Error inesperado:', err);
+        setPortfolioName(`Portafolio ${portfolioId}`); // Fallback
+      } finally {
+        setLoadingPortfolio(false);
+      }
+    };
+
     getCurrentUser();
-  }, [router]);
+    getPortfolioName();
+  }, [router, portfolioId]);
 
   const handleAssetsChange = (newAssets: PortfolioAsset[]) => {
     setAssets(newAssets);
@@ -118,11 +145,32 @@ export default function AssetsPage({
       
       console.log('✅ [SAVE-PORTFOLIO] Todos los activos guardados exitosamente:', savedAssets);
 
-      // Redirigir a la lista de portafolios
+      // Marcar el onboarding como completo
+      console.log('🎓 [SAVE-PORTFOLIO] Marcando onboarding como completo...');
+      const onboardingResponse = await fetch('/api/complete-onboarding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: currentUser.id,
+        }),
+      });
+
+      const onboardingResult = await onboardingResponse.json();
+      
+      if (onboardingResponse.ok && onboardingResult.success) {
+        console.log('✅ [SAVE-PORTFOLIO] Onboarding completado:', onboardingResult.data);
+      } else {
+        console.warn('⚠️ [SAVE-PORTFOLIO] Error al marcar onboarding:', onboardingResult.error);
+      }
+
+      // Redirigir a la aplicación web
       setTimeout(() => {
         setIsLoading(false);
-        router.push('/portfolios');
-      }, 1000);
+        console.log('🚀 [SAVE-PORTFOLIO] Redirigiendo a la app web...');
+        window.location.href = 'https://mi-proyecto-topaz-omega.vercel.app/';
+      }, 1500);
 
     } catch (error) {
       console.error('❌ [SAVE-PORTFOLIO] Error:', error);
@@ -147,7 +195,13 @@ export default function AssetsPage({
             <span className="material-symbols-outlined text-sm">arrow_back</span>
             Volver a Portafolios
           </Link>
-          <h1 className="text-3xl font-medium tracking-wider capitalize">{decodeURIComponent(portfolioId)}</h1>
+          <h1 className="text-3xl font-medium tracking-wider">
+            {loadingPortfolio ? (
+              <span className="animate-pulse">Cargando...</span>
+            ) : (
+              portfolioName
+            )}
+          </h1>
           <p className="text-sm text-gray-400 mt-1">Agrega y gestiona los activos de tu portafolio</p>
         </div>
         <div className="text-right">

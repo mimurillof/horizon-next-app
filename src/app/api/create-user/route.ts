@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
           password_hash: 'handled_by_supabase_auth',
           birth_date: birth_date || null,
           gender: mappedGender,
+          has_completed_onboarding: false, // Nuevo usuario no ha completado onboarding
         }
       ])
       .select();

@@ -38,11 +38,12 @@ export default function RegisterPage() {
     }
 
     try {
-      // Lógica de registro con Supabase
+      // Lógica de registro con Supabase con confirmación de email
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: fullName,
             birth_date: birthDate,
@@ -52,48 +53,32 @@ export default function RegisterPage() {
       });
 
       if (error) {
-        console.error('Error en Auth signup:', error);
+        console.error('❌ Error en Auth signup:', error);
         setError(error.message);
       } else {
-        console.log('Usuario registrado en Auth:', data.user);
-        console.log('Auth data completo:', data);
+        console.log('✅ Usuario registrado en Auth:', data.user?.id);
         
-        // Insertar también en la tabla users personalizada usando API
+        // Si el usuario fue creado exitosamente, guardar datos en localStorage
+        // para crearlos en la tabla users después de confirmar el email
         if (data.user) {
           const [firstName, ...lastNameParts] = fullName.split(' ');
           const lastName = lastNameParts.join(' ') || '';
           
-          console.log('Llamando API para insertar usuario en tabla users');
+          // Guardar temporalmente los datos del usuario
+          localStorage.setItem('pending_user_data', JSON.stringify({
+            user_id: data.user.id,
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            birth_date: birthDate,
+            gender: gender
+          }));
           
-          const userResponse = await fetch('/api/create-user', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              user_id: data.user.id,
-              first_name: firstName,
-              last_name: lastName,
-              email: email,
-              birth_date: birthDate,
-              gender: gender
-            })
-          });
-
-          const userResult = await userResponse.json();
-
-          if (!userResponse.ok) {
-            console.error('Error en API create-user:', userResult);
-            setError(`Usuario creado en Auth pero falló el perfil: ${userResult.message}`);
-          } else {
-            console.log('✅ Usuario insertado exitosamente:', userResult);
-          }
-        } else {
-          console.warn('⚠️ data.user es null - posible confirmación de email requerida');
-          console.log('Data completo recibido:', data);
+          console.log('📧 Datos guardados temporalmente. Redirigiendo a confirmación de email...');
         }
         
-        router.push('/portfolios'); // Redirige al tour de bienvenida tras registro exitoso
+        // Redirigir a página de confirmación de email
+        router.push('/confirm-email');
       }
     } catch (err) {
       setError('Ocurrió un error inesperado. Inténtalo de nuevo.');

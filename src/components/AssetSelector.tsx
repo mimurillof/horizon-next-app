@@ -310,8 +310,15 @@ export default function AssetSelector({ onAssetsChange, initialAssets = [] }: As
                       min="0"
                       step="0.01"
                       placeholder="Valor actual"
-                      value={asset.acquisitionValue}
-                      onChange={(e) => handleUpdateAsset(asset.id, { acquisitionValue: parseFloat(e.target.value) || 0 })}
+                      value={asset.acquisitionValue || ''}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Si el campo está vacío, establecer en 0
+                        // Si tiene valor, parsearlo
+                        handleUpdateAsset(asset.id, { 
+                          acquisitionValue: value === '' ? 0 : parseFloat(value) 
+                        });
+                      }}
                       className="input-line w-28 py-2 text-white placeholder-gray-400 text-right"
                     />
                     <span className="text-xs text-gray-500">{asset.currency}</span>
