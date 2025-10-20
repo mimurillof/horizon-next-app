@@ -41,6 +41,8 @@ export default function LoginPage() {
         console.log('🔄 Intercambiando token de Supabase por JWT del backend...');
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://horizon-backend-316b23e32b8b.herokuapp.com';
         
+        let jwtToken: string | null = null;
+        
         try {
           const tokenExchangeResponse = await fetch(`${backendUrl}/api/supabase-auth/login-direct`, {
             method: 'POST',
@@ -62,12 +64,15 @@ export default function LoginPage() {
           }
 
           const backendToken = await tokenExchangeResponse.json();
+          jwtToken = backendToken.access_token || '';
           console.log('✅ JWT del backend obtenido exitosamente');
           
           // **CRÍTICO: Guardar el JWT en localStorage para que la app React lo use**
-          localStorage.setItem('token', backendToken.access_token);
-          localStorage.setItem('token_type', backendToken.token_type);
-          console.log('💾 Token guardado en localStorage');
+          if (jwtToken) {
+            localStorage.setItem('token', jwtToken);
+            localStorage.setItem('token_type', backendToken.token_type);
+            console.log('💾 Token guardado en localStorage');
+          }
           
         } catch (tokenError) {
           console.error('❌ Error al intercambiar token:', tokenError);
@@ -151,11 +156,22 @@ export default function LoginPage() {
 
         console.log('📊 Estado de onboarding:', userData);
 
+        // Obtener URL de la app web desde variable de entorno
+        const webAppUrl = process.env.NEXT_PUBLIC_WEB_APP_URL || 'https://mi-proyecto-topaz-omega.vercel.app';
+        console.log('🌐 URL de app web:', webAppUrl);
+
         // Redirigir según el estado de onboarding
         if (userData?.has_completed_onboarding) {
           // Usuario existente que ya completó onboarding → App web
           console.log('🚀 Usuario existente, redirigiendo a app web...');
-          window.location.href = 'https://mi-proyecto-topaz-omega.vercel.app/';
+          
+          // **CRÍTICO: Pasar el token como parámetro URL (será procesado y eliminado)**
+          if (jwtToken) {
+            const tokenParam = `?token=${encodeURIComponent(jwtToken)}`;
+            window.location.href = `${webAppUrl}${tokenParam}`;
+          } else {
+            window.location.href = webAppUrl;
+          }
         } else {
           // Usuario nuevo que no ha completado onboarding → Tour
           console.log('🎓 Usuario nuevo, redirigiendo al tour...');
