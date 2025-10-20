@@ -159,19 +159,25 @@ export default function LoginPage() {
         // Obtener URL de la app web desde variable de entorno
         const webAppUrl = process.env.NEXT_PUBLIC_WEB_APP_URL || 'https://mi-proyecto-topaz-omega.vercel.app';
         console.log('🌐 URL de app web:', webAppUrl);
+        console.log('🔑 Token disponible para redireccionamiento:', jwtToken ? 'Sí' : 'No');
 
         // Redirigir según el estado de onboarding
         if (userData?.has_completed_onboarding) {
           // Usuario existente que ya completó onboarding → App web
           console.log('🚀 Usuario existente, redirigiendo a app web...');
           
-          // **CRÍTICO: Pasar el token como parámetro URL (será procesado y eliminado)**
-          if (jwtToken) {
-            const tokenParam = `?token=${encodeURIComponent(jwtToken)}`;
-            window.location.href = `${webAppUrl}${tokenParam}`;
-          } else {
-            window.location.href = webAppUrl;
+          // **CRÍTICO: SIEMPRE pasar el token como parámetro URL**
+          if (!jwtToken) {
+            console.error('❌ ERROR: No hay token JWT disponible para redirección');
+            setError('Error: Token no disponible. Por favor intenta nuevamente.');
+            setLoading(false);
+            return;
           }
+          
+          const tokenParam = `?token=${encodeURIComponent(jwtToken)}`;
+          const finalUrl = `${webAppUrl}${tokenParam}`;
+          console.log('🌐 Redirigiendo a:', finalUrl);
+          window.location.href = finalUrl;
         } else {
           // Usuario nuevo que no ha completado onboarding → Tour
           console.log('🎓 Usuario nuevo, redirigiendo al tour...');
