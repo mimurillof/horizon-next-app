@@ -37,6 +37,45 @@ export default function LoginPage() {
           return;
         }
 
+        // **NUEVO: Intercambiar token de Supabase por JWT del backend**
+        console.log('🔄 Intercambiando token de Supabase por JWT del backend...');
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://horizon-backend-316b23e32b8b.herokuapp.com';
+        
+        try {
+          const tokenExchangeResponse = await fetch(`${backendUrl}/api/supabase-auth/login-direct`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: email,
+              password: password
+            })
+          });
+
+          if (!tokenExchangeResponse.ok) {
+            const errorData = await tokenExchangeResponse.json();
+            console.error('❌ Error al obtener JWT del backend:', errorData);
+            setError(`Error de autenticación: ${errorData.detail || 'No se pudo obtener token del backend'}`);
+            setLoading(false);
+            return;
+          }
+
+          const backendToken = await tokenExchangeResponse.json();
+          console.log('✅ JWT del backend obtenido exitosamente');
+          
+          // **CRÍTICO: Guardar el JWT en localStorage para que la app React lo use**
+          localStorage.setItem('token', backendToken.access_token);
+          localStorage.setItem('token_type', backendToken.token_type);
+          console.log('💾 Token guardado en localStorage');
+          
+        } catch (tokenError) {
+          console.error('❌ Error al intercambiar token:', tokenError);
+          setError('Error al autenticar con el backend. Intenta nuevamente.');
+          setLoading(false);
+          return;
+        }
+
         // Verificar si el usuario existe en la tabla users
         const { data: userData, error: userError } = await supabase
           .from('users')
