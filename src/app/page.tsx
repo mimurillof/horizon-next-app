@@ -18,7 +18,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Lógica de inicio de sesión con Supabase
+      // 1. Lógica de inicio de sesión con Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -26,164 +26,170 @@ export default function LoginPage() {
 
       if (error) {
         setError(error.message);
-      } else {
-        console.log('✅ Inicio de sesión exitoso:', data.user);
-        
-        // Verificar si el email está confirmado
-        if (!data.user.email_confirmed_at) {
-          setError('Por favor confirma tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada y haz clic en el enlace de confirmación.');
-          await supabase.auth.signOut();
-          setLoading(false);
-          return;
-        }
-
-        // **NUEVO: Intercambiar token de Supabase por JWT del backend**
-        console.log('🔄 Intercambiando token de Supabase por JWT del backend...');
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://horizon-backend-316b23e32b8b.herokuapp.com';
-        
-        let jwtToken: string | null = null;
-        
-        try {
-          const tokenExchangeResponse = await fetch(`${backendUrl}/api/supabase-auth/login-direct`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: email,
-              password: password
-            })
-          });
-
-          if (!tokenExchangeResponse.ok) {
-            const errorData = await tokenExchangeResponse.json();
-            console.error('❌ Error al obtener JWT del backend:', errorData);
-            setError(`Error de autenticación: ${errorData.detail || 'No se pudo obtener token del backend'}`);
-            setLoading(false);
-            return;
-          }
-
-          const backendToken = await tokenExchangeResponse.json();
-          jwtToken = backendToken.access_token || '';
-          console.log('✅ JWT del backend obtenido exitosamente');
-          
-          // **CRÍTICO: Guardar el JWT en localStorage para que la app React lo use**
-          if (jwtToken) {
-            localStorage.setItem('token', jwtToken);
-            localStorage.setItem('token_type', backendToken.token_type);
-            console.log('💾 Token guardado en localStorage');
-          }
-          
-        } catch (tokenError) {
-          console.error('❌ Error al intercambiar token:', tokenError);
-          setError('Error al autenticar con el backend. Intenta nuevamente.');
-          setLoading(false);
-          return;
-        }
-
-        // Verificar si el usuario existe en la tabla users
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select('has_completed_onboarding')
-          .eq('user_id', data.user.id)
-          .single();
-
-        // Si el usuario no existe en la tabla users, crearlo
-        if (userError && userError.code === 'PGRST116') {
-          console.log('👤 Usuario no encontrado en tabla users, creando perfil...');
-          
-          // Intentar recuperar datos del localStorage (guardados durante el registro)
-          let userDataToCreate = null;
-          const pendingUserData = localStorage.getItem('pending_user_data');
-          
-          if (pendingUserData) {
-            console.log('📦 Datos encontrados en localStorage');
-            userDataToCreate = JSON.parse(pendingUserData);
-          } else {
-            // Si no hay datos en localStorage, usar los metadatos de Supabase Auth
-            console.log('📋 Usando datos de Supabase Auth metadata');
-            const authMetadata = data.user.user_metadata;
-            const fullName = authMetadata?.full_name || data.user.email?.split('@')[0] || 'Usuario';
-            const [firstName, ...lastNameParts] = fullName.split(' ');
-            const lastName = lastNameParts.join(' ') || '';
-            
-            userDataToCreate = {
-              user_id: data.user.id,
-              first_name: firstName,
-              last_name: lastName,
-              email: data.user.email,
-              birth_date: authMetadata?.birth_date || null,
-              gender: authMetadata?.gender || null
-            };
-          }
-          
-          // Crear el usuario en la tabla users
-          console.log('💾 Creando usuario en tabla users:', userDataToCreate);
-          const createUserResponse = await fetch('/api/create-user', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userDataToCreate)
-          });
-
-          const createUserResult = await createUserResponse.json();
-
-          if (!createUserResponse.ok) {
-            console.error('❌ Error al crear usuario:', createUserResult);
-            setError(`Error al crear tu perfil: ${createUserResult.error || 'Error desconocido'}. Por favor contacta al soporte.`);
-            setLoading(false);
-            return;
-          }
-
-          console.log('✅ Usuario creado exitosamente:', createUserResult);
-          
-          // Limpiar localStorage si existía
-          if (pendingUserData) {
-            localStorage.removeItem('pending_user_data');
-          }
-          
-          // Redirigir al tour (nuevo usuario)
-          console.log('🎓 Usuario nuevo, redirigiendo al tour...');
-          window.location.href = '/portfolios';
-          return;
-        } else if (userError) {
-          console.error('❌ Error al verificar usuario:', userError);
-          setError(`Error al verificar el estado de tu cuenta: ${userError.message}`);
-          setLoading(false);
-          return;
-        }
-
-        console.log('📊 Estado de onboarding:', userData);
-
-        // Obtener URL de la app web desde variable de entorno
-        const webAppUrl = process.env.NEXT_PUBLIC_WEB_APP_URL || 'https://mi-proyecto-topaz-omega.vercel.app';
-        console.log('🌐 URL de app web:', webAppUrl);
-        console.log('🔑 Token disponible para redireccionamiento:', jwtToken ? 'Sí' : 'No');
-
-        // Redirigir según el estado de onboarding
-        if (userData?.has_completed_onboarding) {
-          // Usuario existente que ya completó onboarding → App web
-          console.log('🚀 Usuario existente, redirigiendo a app web...');
-          
-          // **CRÍTICO: SIEMPRE pasar el token como parámetro URL**
-          if (!jwtToken) {
-            console.error('❌ ERROR: No hay token JWT disponible para redirección');
-            setError('Error: Token no disponible. Por favor intenta nuevamente.');
-            setLoading(false);
-            return;
-          }
-          
-          const tokenParam = `?token=${encodeURIComponent(jwtToken)}`;
-          const finalUrl = `${webAppUrl}${tokenParam}`;
-          console.log('🌐 Redirigiendo a:', finalUrl);
-          window.location.href = finalUrl;
-        } else {
-          // Usuario nuevo que no ha completado onboarding → Tour
-          console.log('🎓 Usuario nuevo, redirigiendo al tour...');
-          window.location.href = '/portfolios';
-        }
+        setLoading(false);
+        return;
       }
+
+      console.log('✅ Inicio de sesión exitoso:', data.user);
+      
+      // 2. Verificar si el email está confirmado
+      if (!data.user.email_confirmed_at) {
+        setError('Por favor confirma tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada y haz clic en el enlace de confirmación.');
+        await supabase.auth.signOut();
+        setLoading(false);
+        return;
+      }
+
+      // 3. Verificar si el usuario existe en la tabla users (DB local)
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('has_completed_onboarding')
+        .eq('user_id', data.user.id)
+        .single();
+
+      let hasCompletedOnboarding = false;
+
+      // 4. Si el usuario no existe en la tabla users, crearlo
+      if (userError && userError.code === 'PGRST116') {
+        console.log('👤 Usuario no encontrado en tabla users, creando perfil...');
+        
+        // Intentar recuperar datos del localStorage (guardados durante el registro)
+        let userDataToCreate = null;
+        const pendingUserData = localStorage.getItem('pending_user_data');
+        
+        if (pendingUserData) {
+          console.log('📦 Datos encontrados en localStorage');
+          userDataToCreate = JSON.parse(pendingUserData);
+        } else {
+          // Si no hay datos en localStorage, usar los metadatos de Supabase Auth
+          console.log('📋 Usando datos de Supabase Auth metadata');
+          const authMetadata = data.user.user_metadata;
+          const fullName = authMetadata?.full_name || data.user.email?.split('@')[0] || 'Usuario';
+          const [firstName, ...lastNameParts] = fullName.split(' ');
+          const lastName = lastNameParts.join(' ') || '';
+          
+          userDataToCreate = {
+            user_id: data.user.id,
+            first_name: firstName,
+            last_name: lastName,
+            email: data.user.email,
+            birth_date: authMetadata?.birth_date || null,
+            gender: authMetadata?.gender || null
+          };
+        }
+        
+        // Crear el usuario en la tabla users via API Route
+        console.log('💾 Creando usuario en tabla users:', userDataToCreate);
+        const createUserResponse = await fetch('/api/create-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userDataToCreate)
+        });
+
+        const createUserResult = await createUserResponse.json();
+
+        if (!createUserResponse.ok) {
+          console.error('❌ Error al crear usuario:', createUserResult);
+          setError(`Error al crear tu perfil: ${createUserResult.error || 'Error desconocido'}. Por favor contacta al soporte.`);
+          setLoading(false);
+          return;
+        }
+
+        console.log('✅ Usuario creado exitosamente:', createUserResult);
+        
+        // Limpiar localStorage si existía
+        if (pendingUserData) {
+          localStorage.removeItem('pending_user_data');
+        }
+        
+        // El usuario acaba de ser creado, por defecto onboarding es false
+        hasCompletedOnboarding = false;
+      } else if (userError) {
+        console.error('❌ Error al verificar usuario:', userError);
+        setError(`Error al verificar el estado de tu cuenta: ${userError.message}`);
+        setLoading(false);
+        return;
+      } else {
+        // Usuario existía
+        hasCompletedOnboarding = userData.has_completed_onboarding;
+      }
+
+      // 5. Intercambiar token de Supabase por JWT del backend
+      // AHORA es seguro hacerlo porque el usuario YA existe en la DB
+      console.log('🔄 Intercambiando token de Supabase por JWT del backend...');
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://horizon-backend-316b23e32b8b.herokuapp.com';
+      
+      let jwtToken: string | null = null;
+      
+      try {
+        // Usamos verify-and-login que es más seguro y no requiere contraseña
+        const tokenExchangeResponse = await fetch(`${backendUrl}/api/supabase-auth/verify-and-login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            supabase_token: data.session.access_token,
+            email: data.user.email
+          })
+        });
+
+        if (!tokenExchangeResponse.ok) {
+          const errorData = await tokenExchangeResponse.json();
+          console.error('❌ Error al obtener JWT del backend:', errorData);
+          setError(`Error de autenticación con backend: ${errorData.detail || 'No se pudo obtener token'}`);
+          setLoading(false);
+          return;
+        }
+
+        const backendToken = await tokenExchangeResponse.json();
+        jwtToken = backendToken.access_token || '';
+        console.log('✅ JWT del backend obtenido exitosamente');
+        
+        if (jwtToken) {
+          localStorage.setItem('token', jwtToken);
+          localStorage.setItem('token_type', backendToken.token_type);
+          console.log('💾 Token guardado en localStorage');
+        }
+        
+      } catch (tokenError) {
+        console.error('❌ Error al intercambiar token:', tokenError);
+        setError('Error al autenticar con el backend. Intenta nuevamente.');
+        setLoading(false);
+        return;
+      }
+
+      console.log('📊 Estado de onboarding:', hasCompletedOnboarding);
+
+      // Obtener URL de la app web desde variable de entorno
+      const webAppUrl = process.env.NEXT_PUBLIC_WEB_APP_URL || 'https://mi-proyecto-topaz-omega.vercel.app';
+      console.log('🌐 URL de app web:', webAppUrl);
+      console.log('🔑 Token disponible para redireccionamiento:', jwtToken ? 'Sí' : 'No');
+
+      // 6. Redirigir según el estado de onboarding
+      if (hasCompletedOnboarding) {
+        // Usuario existente que ya completó onboarding → App web
+        console.log('🚀 Usuario existente, redirigiendo a app web...');
+        
+        if (!jwtToken) {
+          console.error('❌ ERROR: No hay token JWT disponible para redirección');
+          setError('Error: Token no disponible. Por favor intenta nuevamente.');
+          setLoading(false);
+          return;
+        }
+        
+        const tokenParam = `?token=${encodeURIComponent(jwtToken)}`;
+        const finalUrl = `${webAppUrl}${tokenParam}`;
+        console.log('🌐 Redirigiendo a:', finalUrl);
+        window.location.href = finalUrl;
+      } else {
+        // Usuario nuevo que no ha completado onboarding → Tour
+        console.log('🎓 Usuario nuevo, redirigiendo al tour...');
+        window.location.href = '/portfolios';
+      }
+
     } catch (err) {
       setError('Ocurrió un error inesperado. Inténtalo de nuevo.');
       console.error('Error de inicio de sesión:', err);

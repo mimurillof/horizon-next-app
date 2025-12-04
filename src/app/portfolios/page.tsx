@@ -194,10 +194,10 @@ export default function WelcomeTourPage() {
       {/* Quick Access Link */}
       <div className="mt-2 sm:mt-4 text-center">
         <button
-          onClick={() => router.push('/portfolios/questions')}
+          onClick={handleCreatePortfolio}
           className="text-xs text-gray-400 hover:text-[#B4B4B4] transition-colors underline"
         >
-          ¿Prefieres responder el cuestionario de perfil primero?
+          ¿Prefieres responder el cuestionario de perfil? (Requiere crear portafolio)
         </button>
       </div>
     </div>
